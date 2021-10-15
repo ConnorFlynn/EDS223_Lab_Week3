@@ -1,0 +1,70 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prerequisites
+
+```{r}
+library(sf)
+library(dplyr)
+library(spData)
+library(spDataLarge)
+```
+
+## Geometric operations on vector data
+
+### Buffers
+
+```{r}
+seine_buff_5km  = st_buffer(seine, dist =  5000)
+seine_buff_50km = st_buffer(seine, dist = 50000)
+```
+
+```{r}
+plot(seine,           key.pos = 1, main = NULL)
+plot(seine_buff_5km,  key.pos = 1, main = NULL)
+plot(seine_buff_50km, key.pos = 1, main = NULL)
+```
+
+### Clipping
+
+```{r}
+b <- st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) %>%
+  st_buffer(dist = 1)
+
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+```
+
+```{r}
+x <- b[1]
+y <- b[2]
+
+clip_demo <- function(op) {
+  plot(b)
+  plot(op(x, y), col = "lightgrey", add = TRUE)
+}
+```
+
+```{r}
+clip_demo(st_intersection)   # AND
+clip_demo(st_union)          # OR
+clip_demo(st_sym_difference) # XOR
+clip_demo(st_difference)
+```
+
+```{r}
+box <-
+  st_union(x, y) %>%
+  st_bbox() %>%
+  st_as_sfc()
+
+set.seed(2017)
+p <- st_sample(box, size = 10)
+
+plot(box)
+plot(x, add = TRUE)
+plot(y, add = TRUE)
+plot(p[box], add = TRUE)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+```
